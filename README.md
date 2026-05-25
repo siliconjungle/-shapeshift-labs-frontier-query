@@ -2,6 +2,8 @@
 
 Shared query, selector, and table-shape primitives for Frontier packages.
 
+This package defines the dependency-free vocabulary that Frontier mutation, state-cache, and future query runtimes can share without pulling in app state, patch codecs, or CRDT behavior.
+
 - npm: [`@shapeshift-labs/frontier-query`](https://www.npmjs.com/package/@shapeshift-labs/frontier-query)
 - source: [`siliconjungle/-shapeshift-labs-frontier-query`](https://github.com/siliconjungle/-shapeshift-labs-frontier-query)
 - license: MIT
@@ -20,11 +22,13 @@ Package source repositories:
 - [`siliconjungle/-shapeshift-labs-frontier-engine`](https://github.com/siliconjungle/-shapeshift-labs-frontier-engine)
 - [`siliconjungle/-shapeshift-labs-frontier-mutation`](https://github.com/siliconjungle/-shapeshift-labs-frontier-mutation)
 
-This package is intentionally small. It does not own a cache, query runtime, state engine, mutation planner, CRDT layer, or patch codec. It only provides the vocabulary that Frontier state-cache and mutation packages need to interpret identically.
+## Install
 
 ```sh
 npm install @shapeshift-labs/frontier-query
 ```
+
+## Usage
 
 ```js
 import {
@@ -74,7 +78,15 @@ Special condition fields:
 - `$index` is the current array row index.
 - `$mapKey` is the current object-map key when it should be kept distinct from `keyBy()`.
 
-## Package Boundary
+## Subpath Imports
+
+This package currently exposes the root entry point only:
+
+```ts
+import { hashQueryKey } from '@shapeshift-labs/frontier-query';
+```
+
+## Package Scope
 
 Use this package when multiple Frontier layers must agree on selector/query semantics. Keep runtimes elsewhere:
 
@@ -82,6 +94,19 @@ Use this package when multiple Frontier layers must agree on selector/query sema
 - write planning belongs in `@shapeshift-labs/frontier-mutation`,
 - patch routing and owned app state belong in Frontier state packages,
 - compact diff/apply stays in `@shapeshift-labs/frontier`.
+
+## TypeScript
+
+The package ships ESM JavaScript plus `.d.ts` declarations for the root export. The package-local TypeScript source lives in `src/` and compiles directly to `dist/`.
+
+## Validation
+
+```sh
+npm test
+npm run fuzz
+npm run bench
+npm run pack:dry
+```
 
 ## Benchmarks
 
@@ -91,26 +116,17 @@ Run the package-local benchmark:
 npm run bench
 ```
 
-Latest local package-gate run on Node v26.1.0, darwin arm64, 3 rounds:
+Latest local package benchmark on Node v26.1.0, darwin arm64, 3 rounds:
 
 | Fixture | Median | p95 |
 | --- | ---: | ---: |
-| Stable query key hash | 0.80 us | 0.81 us |
+| Stable query key hash | 0.83 us | 0.85 us |
 | Partial query key match | 0.06 us | 0.06 us |
-| Condition match over row | 0.37 us | 0.37 us |
-| Schema normalization | 0.48 us | 0.48 us |
-| Entity identity read | 0.03 us | 0.03 us |
+| Condition match over row | 0.29 us | 0.40 us |
+| Schema normalization | 0.48 us | 0.52 us |
+| Entity identity read | 0.03 us | 0.04 us |
 
 These are Frontier-only package measurements, not competitor comparisons.
-
-## Verification
-
-```sh
-npm test
-npm run fuzz
-npm run bench
-npm run pack:dry
-```
 
 ## License
 
