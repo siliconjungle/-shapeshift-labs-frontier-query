@@ -8,10 +8,15 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "ignoreDeprecations": "6.0",
+    "stripInternal": true,
     "strict": false,
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "composite": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo",
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

@@ -4,6 +4,8 @@ Shared query, selector, and table-shape primitives for Frontier packages.
 
 Repository: [siliconjungle/-shapeshift-labs-frontier-query](https://github.com/siliconjungle/-shapeshift-labs-frontier-query)
 
+Core Frontier package: [`@shapeshift-labs/frontier`](https://www.npmjs.com/package/@shapeshift-labs/frontier)
+
 This package is intentionally small. It does not own a cache, query runtime, state engine, mutation planner, CRDT layer, or patch codec. It only provides the vocabulary that Frontier state-cache and mutation packages need to interpret identically.
 
 ```sh
@@ -27,13 +29,29 @@ const matches = matchesQueryConditions(
 
 ## API
 
+### Query Keys
+
 - `hashQueryKey(key)` creates a deterministic JSON query-key string with stable object-key ordering.
 - `partialMatchQueryKey(candidate, partial)` supports prefix/object-subset invalidation checks.
+
+### Paths And Schemas
+
 - `normalizeQueryPath(path, label?)` accepts JSON pointer strings, dot paths, or path arrays.
 - `normalizeQuerySchema(schema, label?)` normalizes trusted table/entity schema hints.
+
+### Conditions
+
 - `readQueryCondition(fieldOrCondition, op?, value?)` creates or clones condition objects.
+- `cloneQueryCondition(condition)` clones nested condition trees and normalizes condition paths.
+- `collectQueryConditionFields(conditions, out)` records every field path read by a condition tree.
 - `matchesQueryConditions(value, conditions, meta?)` evaluates selector/query predicates.
+- `readQueryConditionValue(value, field, meta?)` reads a row field or special `$key`/`$index`/`$mapKey` meta field.
 - `readQueryConditionEqualityHint(conditions, field)` extracts equality/in hints for indexes.
+- `normalizeQueryOperator(condition)` resolves operator aliases such as `==`, `gte`, and `<=`.
+- `readQueryConditionExpected(condition, op)` reads the canonical expected value for a resolved operator.
+
+### Entity Identity
+
 - `identifyQueryEntity(input, options?, path?)` implements `__typename` plus `id`/`_id` identity with custom overrides.
 
 Special condition fields:
@@ -50,6 +68,35 @@ Use this package when multiple Frontier layers must agree on selector/query sema
 - write planning belongs in `@shapeshift-labs/frontier-mutation`,
 - patch routing and owned app state belong in Frontier state packages,
 - compact diff/apply stays in `@shapeshift-labs/frontier`.
+
+## Benchmarks
+
+Run the package-local benchmark:
+
+```sh
+npm run bench
+```
+
+Latest local package run on Node v26.1.0, darwin arm64, 15 rounds:
+
+| Fixture | Median | p95 |
+| --- | ---: | ---: |
+| Stable query key hash | 0.78 us | 0.81 us |
+| Partial query key match | 0.03 us | 0.07 us |
+| Condition match over row | 0.21 us | 0.36 us |
+| Schema normalization | 0.34 us | 0.50 us |
+| Entity identity read | 0.01 us | 0.04 us |
+
+These are Frontier-only package measurements, not competitor comparisons.
+
+## Verification
+
+```sh
+npm test
+npm run fuzz
+npm run bench
+npm run pack:dry
+```
 
 ## License
 
