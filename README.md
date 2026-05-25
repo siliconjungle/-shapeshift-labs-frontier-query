@@ -2,9 +2,21 @@
 
 Shared query, selector, and table-shape primitives for Frontier packages.
 
-Repository: [siliconjungle/-shapeshift-labs-frontier-query](https://github.com/siliconjungle/-shapeshift-labs-frontier-query)
+- npm: [`@shapeshift-labs/frontier-query`](https://www.npmjs.com/package/@shapeshift-labs/frontier-query)
+- source: [`siliconjungle/-shapeshift-labs-frontier-query`](https://github.com/siliconjungle/-shapeshift-labs-frontier-query)
+- license: MIT
 
-Core Frontier package: [`@shapeshift-labs/frontier`](https://www.npmjs.com/package/@shapeshift-labs/frontier)
+## Related Packages
+
+- [`@shapeshift-labs/frontier`](https://www.npmjs.com/package/@shapeshift-labs/frontier): core JSON diff/apply primitives.
+- [`@shapeshift-labs/frontier-codec`](https://www.npmjs.com/package/@shapeshift-labs/frontier-codec): patch serialization, binary frames, canonical JSON, and patch-history codecs.
+- [`@shapeshift-labs/frontier-mutation`](https://www.npmjs.com/package/@shapeshift-labs/frontier-mutation): explicit mutation and selector plans that use this package's shared selector vocabulary.
+
+Package source repositories:
+
+- [`siliconjungle/-shapeshift-labs-frontier`](https://github.com/siliconjungle/-shapeshift-labs-frontier)
+- [`siliconjungle/-shapeshift-labs-frontier-codec`](https://github.com/siliconjungle/-shapeshift-labs-frontier-codec)
+- [`siliconjungle/-shapeshift-labs-frontier-mutation`](https://github.com/siliconjungle/-shapeshift-labs-frontier-mutation)
 
 This package is intentionally small. It does not own a cache, query runtime, state engine, mutation planner, CRDT layer, or patch codec. It only provides the vocabulary that Frontier state-cache and mutation packages need to interpret identically.
 
@@ -77,15 +89,15 @@ Run the package-local benchmark:
 npm run bench
 ```
 
-Latest local package run on Node v26.1.0, darwin arm64, 15 rounds:
+Latest local package-gate run on Node v26.1.0, darwin arm64, 3 rounds:
 
 | Fixture | Median | p95 |
 | --- | ---: | ---: |
-| Stable query key hash | 0.78 us | 0.81 us |
-| Partial query key match | 0.03 us | 0.07 us |
-| Condition match over row | 0.21 us | 0.36 us |
-| Schema normalization | 0.34 us | 0.50 us |
-| Entity identity read | 0.01 us | 0.04 us |
+| Stable query key hash | 0.80 us | 0.83 us |
+| Partial query key match | 0.06 us | 0.06 us |
+| Condition match over row | 0.29 us | 0.35 us |
+| Schema normalization | 0.50 us | 0.50 us |
+| Entity identity read | 0.03 us | 0.03 us |
 
 These are Frontier-only package measurements, not competitor comparisons.
 
