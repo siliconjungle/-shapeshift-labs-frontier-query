@@ -27,6 +27,7 @@ console.log(`frontier query fuzz passed cases=${cases} seed=${initialSeed}`);
 function checkHashStability() {
   const value = randomJson(0);
   const shuffled = shuffleObjectKeys(value);
+  assert.strictEqual(hashQueryKey(value), referenceStableHash(value));
   assert.strictEqual(hashQueryKey(value), hashQueryKey(shuffled));
 }
 
@@ -209,6 +210,16 @@ function shuffleObjectKeys(value) {
   const out = {};
   for (const key of keys) out[key] = shuffleObjectKeys(value[key]);
   return out;
+}
+
+function referenceStableHash(value) {
+  return JSON.stringify(value, (_key, item) => {
+    if (!isPlainObject(item)) return item;
+    const out = {};
+    const keys = Object.keys(item).sort();
+    for (const key of keys) out[key] = item[key];
+    return out;
+  });
 }
 
 function randomJson(depth) {

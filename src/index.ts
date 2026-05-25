@@ -17,6 +17,8 @@ export type JsonPath = PathSegment[];
 export type ObjectKey = string | number;
 
 const hasOwn = Object.prototype.hasOwnProperty;
+type ConditionPathCacheEntry = { field: string; path: JsonPath };
+const conditionPathCache = new WeakMap<object, ConditionPathCacheEntry>();
 
 export type QueryPath = string | JsonPath;
 export type QueryKey = JsonValue;
@@ -112,7 +114,7 @@ export type QueryEntityInput =
     };
 
 export function hashQueryKey(key: QueryKey): string {
-  return JSON.stringify(key, stableJsonReplacer);
+  return stableQueryStringify(key) || 'null';
 }
 
 export function partialMatchQueryKey(candidate: QueryKey, partial: QueryKey): boolean {
@@ -316,7 +318,7 @@ function evaluateQueryCondition(
   if ('and' in condition) return condition.and.every((item) => evaluateQueryCondition(value, item, meta));
   if ('or' in condition) return condition.or.some((item) => evaluateQueryCondition(value, item, meta));
   if ('not' in condition) return !evaluateQueryCondition(value, condition.not, meta);
-  const actual = readQueryConditionValue(value, normalizeQueryPath(condition.field, 'condition field'), meta);
+  const actual = readQueryConditionValue(value, readConditionPath(condition), meta);
   const op = normalizeQueryOperator(condition);
   const expected = readQueryConditionExpected(condition, op);
   if (op === 'exists') return expected === false ? actual === undefined : actual !== undefined;
@@ -343,7 +345,7 @@ function readSingleConditionEqualityHint(condition: QueryCondition, field: JsonP
     return uniqueObjectKeys(values);
   }
   if ('not' in condition) return undefined;
-  if (!samePath(normalizeQueryPath(condition.field, 'condition field'), field)) return undefined;
+  if (!samePath(readConditionPath(condition), field)) return undefined;
   const op = normalizeQueryOperator(condition);
   if (op !== 'eq' && op !== 'in') return undefined;
   const expected = readQueryConditionExpected(condition, op);
@@ -353,6 +355,15 @@ function readSingleConditionEqualityHint(condition: QueryCondition, field: JsonP
     if (typeof value === 'string' || typeof value === 'number') keys.push(value);
   }
   return keys.length === 0 ? undefined : uniqueObjectKeys(keys);
+}
+
+function readConditionPath(condition: Extract<QueryCondition, { field: QueryPath }>): JsonPath {
+  if (Array.isArray(condition.field)) return condition.field.slice();
+  const cached = conditionPathCache.get(condition);
+  if (cached !== undefined && cached.field === condition.field) return cached.path;
+  const path = normalizeQueryPath(condition.field, 'condition field');
+  conditionPathCache.set(condition, { field: condition.field, path });
+  return path;
 }
 
 function getPath(value: JsonValue, path: JsonPath): JsonValue | undefined {
@@ -435,12 +446,31 @@ function samePath(left: JsonPath, right: JsonPath): boolean {
   return true;
 }
 
-function stableJsonReplacer(_key: string, value: unknown): unknown {
-  if (!isPlainObject(value)) return value;
-  const out: Record<string, unknown> = {};
+function stableQueryStringify(value: unknown): string | undefined {
+  if (value === null) return 'null';
+  const type = typeof value;
+  if (type === 'string') return JSON.stringify(value);
+  if (type === 'number' || type === 'boolean') return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    let out = '[';
+    for (let i = 0; i < value.length; i++) {
+      if (i !== 0) out += ',';
+      out += stableQueryStringify(value[i]) || 'null';
+    }
+    return out + ']';
+  }
+  if (!isPlainObject(value)) return undefined;
   const keys = Object.keys(value).sort();
-  for (let i = 0; i < keys.length; i++) out[keys[i]] = (value as Record<string, unknown>)[keys[i]];
-  return out;
+  let out = '{';
+  let written = 0;
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const encoded = stableQueryStringify((value as Record<string, unknown>)[key]);
+    if (encoded === undefined) continue;
+    if (written++ !== 0) out += ',';
+    out += JSON.stringify(key) + ':' + encoded;
+  }
+  return out + '}';
 }
 
 function isQueryEntityIdValue(value: unknown): value is string | number | boolean {

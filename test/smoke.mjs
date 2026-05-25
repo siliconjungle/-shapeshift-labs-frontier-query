@@ -40,6 +40,17 @@ assert.ok(matchesQueryConditions(row, [
   { field: '$index', eq: 2 },
   { field: '$mapKey', eq: 'row-a' }
 ], { key: 'a', rowIndex: 2, mapKey: 'row-a' }));
+const mutableCondition = { field: 'owner.id', eq: 'u1' };
+assert.ok(matchesQueryConditions(row, [mutableCondition]));
+mutableCondition.field = 'kind';
+mutableCondition.eq = 'todo';
+assert.ok(matchesQueryConditions(row, [mutableCondition]));
+const mutableArrayField = { field: ['owner', 'id'], eq: 'u1' };
+assert.ok(matchesQueryConditions(row, [mutableArrayField]));
+mutableArrayField.field[0] = 'kind';
+mutableArrayField.field.length = 1;
+mutableArrayField.eq = 'todo';
+assert.ok(matchesQueryConditions(row, [mutableArrayField]));
 assert.strictEqual(readQueryConditionValue(row, ['owner', 'id']), 'u1');
 assert.strictEqual(isSpecialQueryPath(['$index']), true);
 
