@@ -1,6 +1,6 @@
 {
   "name": "@shapeshift-labs/frontier-query",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared query, selector, and table-shape primitives for Frontier packages.",
   "type": "module",
   "license": "MIT",
