@@ -10,12 +10,14 @@ Shared query, selector, and table-shape primitives for Frontier packages.
 
 - [`@shapeshift-labs/frontier`](https://www.npmjs.com/package/@shapeshift-labs/frontier): core JSON diff/apply primitives.
 - [`@shapeshift-labs/frontier-codec`](https://www.npmjs.com/package/@shapeshift-labs/frontier-codec): patch serialization, binary frames, canonical JSON, and patch-history codecs.
+- [`@shapeshift-labs/frontier-engine`](https://www.npmjs.com/package/@shapeshift-labs/frontier-engine): planned diff engine, adaptive profiles, and reusable schema/history planning.
 - [`@shapeshift-labs/frontier-mutation`](https://www.npmjs.com/package/@shapeshift-labs/frontier-mutation): explicit mutation and selector plans that use this package's shared selector vocabulary.
 
 Package source repositories:
 
 - [`siliconjungle/-shapeshift-labs-frontier`](https://github.com/siliconjungle/-shapeshift-labs-frontier)
 - [`siliconjungle/-shapeshift-labs-frontier-codec`](https://github.com/siliconjungle/-shapeshift-labs-frontier-codec)
+- [`siliconjungle/-shapeshift-labs-frontier-engine`](https://github.com/siliconjungle/-shapeshift-labs-frontier-engine)
 - [`siliconjungle/-shapeshift-labs-frontier-mutation`](https://github.com/siliconjungle/-shapeshift-labs-frontier-mutation)
 
 This package is intentionally small. It does not own a cache, query runtime, state engine, mutation planner, CRDT layer, or patch codec. It only provides the vocabulary that Frontier state-cache and mutation packages need to interpret identically.
@@ -93,10 +95,10 @@ Latest local package-gate run on Node v26.1.0, darwin arm64, 3 rounds:
 
 | Fixture | Median | p95 |
 | --- | ---: | ---: |
-| Stable query key hash | 0.80 us | 0.83 us |
+| Stable query key hash | 0.80 us | 0.81 us |
 | Partial query key match | 0.06 us | 0.06 us |
-| Condition match over row | 0.29 us | 0.35 us |
-| Schema normalization | 0.50 us | 0.50 us |
+| Condition match over row | 0.37 us | 0.37 us |
+| Schema normalization | 0.48 us | 0.48 us |
 | Entity identity read | 0.03 us | 0.03 us |
 
 These are Frontier-only package measurements, not competitor comparisons.
